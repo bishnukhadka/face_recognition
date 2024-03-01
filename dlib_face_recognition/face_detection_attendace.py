@@ -9,7 +9,6 @@ from utility.utility import *
 # Global variables
 FRAME_RATE = 10  # Desired frame rate (frames per second)
 PREV_CAPTURE_TIME = 0
-CAPTURING = True
 IMAGE = None
 # Global lock for synchronizing access to process_image function
 process_image_lock = threading.Lock()
@@ -104,7 +103,6 @@ def main():
             cv2.imshow("webcam", IMAGE)
         # Check for 'q' key pressed to exit the loop
         if cv2.waitKey(1) & 0xFF == ord('q'):
-            CAPTURING = False
             break
     cap.release()
     cv2.destroyAllWindows()

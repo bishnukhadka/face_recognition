@@ -141,7 +141,6 @@ def get_attendance_dict_for_today(db):
         attendance_doc_dict = attendance_doc.to_dict()
         print(f"{teacher_id}: docs = {attendance_doc_dict}")
         date, count = get_date_and_count_from_attendance_data(attendence_doc=attendance_doc_dict)
-
         # temp_dict = copy.deepcopy(attendance_doc_dict)
         # attendance_data = attendance_doc_dict[split_today[0]][split_today[1]]
         # attendance_data.update({'count': count+1, split_today[2]: {'check_in_time': "current_time"}})
@@ -149,8 +148,6 @@ def get_attendance_dict_for_today(db):
         # month_attendance_data.update({split_today[1]: attendance_data})
         # temp_dict[split_today[0]] = month_attendance_data
         # print(f"temp_dict: {temp_dict}")
-
-        print()
         if(date == today ):
             attendance_status_dict[teacher_id] = True
         else:
