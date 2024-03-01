@@ -2,5 +2,7 @@ dlib_face_recognition/utility/__pycache__
 dlib_face_recognition/Training_images
 dlib_face_recognition/requirements.txt
 dlib_face_recognition/serviceAccountKey.json
-dlib_face_recognition"teachers.json
+dlib_face_recognition/teachers.json
 dlib_face_recognition/Attendance.csv
+dlib_face_recognition.rar
+.gitignore
