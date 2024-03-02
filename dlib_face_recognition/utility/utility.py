@@ -42,7 +42,6 @@ def read_json_file(file_path):
 
 
 def get_date_and_count_from_attendance_data(attendence_doc):
-    # print("get_date_and_count_form_attendence_data() called.")
     # Extract the keys
     year = list(attendence_doc.keys())[0]
     month = list(attendence_doc[year].keys())[0]
@@ -50,12 +49,10 @@ def get_date_and_count_from_attendance_data(attendence_doc):
     day = list(attendence_doc[year][month].keys())
     day.remove('count')
     day.sort(reverse=True)
-    print(f" inside get_date_and_count_from_attendence=> day_list_reverse: {day}")
     day= day[0]
 
     # Construct the desired string
     date_string = f"{year}-{month}-{day}"
-    print(f"get_date_and_count_from_attendance_data: {date_string}")
     return date_string, count
 
 
@@ -84,7 +81,6 @@ def markAttendance(name, db):
             }
         teacher_ids = get_teachers_dict()
         user_id = teacher_ids[name.lower()]
-        # print(f"{user_id} for {name}")
         try:  
             # Get the attendance record for today
             # attendance_ref = db.collection('teacher_attendance').document(user_id).collection('last_recorded_date').document('record')
@@ -133,21 +129,13 @@ def get_attendance_dict_for_today(db):
     attendance_ref = db.collection('teacher_attendance')
     teacher_id_dict = get_teachers_dict()
     today = datetime.now().strftime("%Y-%m-%d")
-    split_today = today.split(sep="-")
+    # split_today = today.split(sep="-")
 
     attendance_status_dict = {}
     for i,teacher_id in enumerate(teacher_id_dict.values()):
         attendance_doc = attendance_ref.document(teacher_id).collection('year').document('record').get()
         attendance_doc_dict = attendance_doc.to_dict()
-        print(f"{teacher_id}: docs = {attendance_doc_dict}")
-        date, count = get_date_and_count_from_attendance_data(attendence_doc=attendance_doc_dict)
-        # temp_dict = copy.deepcopy(attendance_doc_dict)
-        # attendance_data = attendance_doc_dict[split_today[0]][split_today[1]]
-        # attendance_data.update({'count': count+1, split_today[2]: {'check_in_time': "current_time"}})
-        # month_attendance_data = attendance_doc_dict[split_today[0]]
-        # month_attendance_data.update({split_today[1]: attendance_data})
-        # temp_dict[split_today[0]] = month_attendance_data
-        # print(f"temp_dict: {temp_dict}")
+        date, _ = get_date_and_count_from_attendance_data(attendence_doc=attendance_doc_dict)
         if(date == today ):
             attendance_status_dict[teacher_id] = True
         else:
