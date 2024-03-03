@@ -28,7 +28,7 @@ def set_event(event):
 def process_face_encodings(match_found_event,successful_attendance_event, att_already_done_event,imgS, facesCurFrame):
     print(threading.current_thread().name)
     global encodeListKnown, classNames, name
-            
+    imgS = cv2.cvtColor(imgS, cv2.COLOR_BGR2RGB)
     encodesCurFrame = face_recognition.face_encodings(imgS, facesCurFrame)
     
     for encodeFace in encodesCurFrame:
@@ -58,19 +58,18 @@ def process_face_encodings(match_found_event,successful_attendance_event, att_al
 
 def process_image(face_detected_event):
     global attendance_status_dict, teacher_dict, x1,x2,y1,y2, encodeListKnown, classNames,db,name
-    imgS = cv2.resize(IMAGE, (0, 0), None, 0.25, 0.25)
-    imgS = cv2.cvtColor(imgS, cv2.COLOR_BGR2RGB)
+    img = cv2.resize(IMAGE, (0, 0), None, 0.2, 0.2)
+    imgS = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
     facesCurFrame = face_recognition.face_locations(imgS)
     if(not facesCurFrame):
-         return False, facesCurFrame, imgS
+         return False, facesCurFrame, img
     else:
         for faceLoc in facesCurFrame:
             y1, x2, y2, x1 = faceLoc
-            y1, x2, y2, x1 = y1 * 4, x2 * 4, y2 * 4, x1 * 4
+            y1, x2, y2, x1 = y1 * 5, x2 * 5, y2 * 5, x1 * 5
             set_event(face_detected_event)
-        return True, facesCurFrame, imgS
-
+        return True, facesCurFrame, img
 
 def main():
     global attendance_status_dict, PREV_CAPTURE_TIME, FRAME_RATE, IMAGE, teacher_dict, classNames,db, encodeListKnown, name
@@ -113,12 +112,17 @@ def main():
                     IMAGE = img
                     has_faces, facesCurFrame, imgS= process_image(face_detected_event=face_detected_event)
                     if(has_faces):
+                    #     process_face_encodings(match_found_event,
+                    #                                 successful_attendance_event,
+                    #                                 att_already_done_event,
+                    #                                 imgS, 
+                    #                                 facesCurFrame)
                         executor.submit(process_face_encodings,                                                 
-                                                 match_found_event,
-                                                 successful_attendance_event,
-                                                 att_already_done_event,
-                                                 imgS, 
-                                                 facesCurFrame)
+                                                    match_found_event,
+                                                    successful_attendance_event,
+                                                    att_already_done_event,
+                                                    imgS, 
+                                                    facesCurFrame)
                 
                 if face_detected_event.is_set():
                         cv2.rectangle(IMAGE, (x1, y1), (x2, y2), (0, 255, 0), 2)
@@ -144,8 +148,8 @@ def main():
             # Check for 'q' key pressed to exit the loop
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
-    cap.release()
-    cv2.destroyAllWindows()
+        cap.release()
+        cv2.destroyAllWindows()
     
 if __name__ == "__main__":
     main()

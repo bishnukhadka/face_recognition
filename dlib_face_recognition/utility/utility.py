@@ -91,31 +91,47 @@ def markAttendance(name, db):
             # DEBUG: 
             print(f"GOT attendence doc: {attendance_doc_dict}")
 
-            if  not attendance_doc.exists:  
-                attendance_ref.set(attendance_data)
-                print(f"Attendence record SET for {name} for date: {today}")
-            else:
-                date_from_att_doc, month_att_count = get_date_and_count_from_attendance_data(attendance_doc_dict)    
+            if attendance_doc.exists:  
+                date_from_att_doc, month_att_count = get_date_and_count_from_attendance_data(attendance_doc_dict) 
+                date_from_att_doc_split = date_from_att_doc.split("-")   
                 print(f"date form att doc: {date_from_att_doc}, today: {today}")
                 # also the date_from_att_doc should be in correct format.
-                print(f"are_all_numbers: are_all_numbers(split_today)")
                 if (all_elements_convertible_to_int(split_today) and date_from_att_doc != today):
-                    attendance_data = attendance_doc_dict[split_today[0]][split_today[1]]
-                    attendance_data.update({'count': month_att_count+1, split_today[2]: {'check_in_time': "current_time"}})
-                    month_attendance_data = attendance_doc_dict[split_today[0]]
-                    month_attendance_data.update({split_today[1]: attendance_data})
-                    temp_dict[split_today[0]] = month_attendance_data
-                    print(temp_dict)
-                    attendance_ref.update(temp_dict)
-                    print(f"Attendance recorded UPDATE for {name} for date:{today}")
+                    # year not equal
+                    if (date_from_att_doc_split[0] != split_today[0]):
+                        print("year not equal")
+                        attendance_ref.update(attendance_data)
+                        return True
+                    #month no equal 
+                    if (date_from_att_doc_split[1] != split_today[1]):
+                        print("month not equal")
+                        temp = attendance_data[split_today[0]]
+                        # print(f"before temp: {temp}")
+                        temp_dict[split_today[0]][split_today[1]] = temp[split_today[1]]
+                        # print(f"last:: {temp_dict}")
+                        attendance_ref.update(temp_dict)
+                        return True
+                    #day not equal
+                    if(date_from_att_doc_split[2]!=split_today[2]):
+                        # print(temp_dict)
+                        temp = attendance_data[split_today[0]][split_today[1]]
+                        del temp['count']
+                        temp_dict[split_today[0]][split_today[1]][split_today[2]] = temp[split_today[2]]
+                        temp_dict[split_today[0]][split_today[1]]['count'] = month_att_count + 1
+                        print(f"temp_dict: {temp_dict}")
+                        attendance_ref.update(temp_dict)
+                        print(f"Attendance recorded UPDATE for {name} for date:{today}")
+                        return True
                 else:
-                    # Attendance record for today exists
-                    # this means that the person has already done attendence today. 
-                    print(f"Either last attended date = Today OR date could not be retrieved .")
+                    return False
+            else:
+                # Attendance record document does not exist.
+                attendance_ref.set(attendance_data)
+                print(f"Attendence record SET for {name} for date: {today}")
+                return True
         except Exception as e:
             print("Error recording attendance:", e)
             return False
-    return True
 
 def get_teachers_dict():
     """
@@ -135,6 +151,7 @@ def get_attendance_dict_for_today(db):
     for i,teacher_id in enumerate(teacher_id_dict.values()):
         attendance_doc = attendance_ref.document(teacher_id).collection('year').document('record').get()
         attendance_doc_dict = attendance_doc.to_dict()
+        # print(attendance_doc_dict)
         date, _ = get_date_and_count_from_attendance_data(attendence_doc=attendance_doc_dict)
         if(date == today ):
             attendance_status_dict[teacher_id] = True
